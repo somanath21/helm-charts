@@ -11,6 +11,28 @@ purge:
 	helm del $(RELEASE)
 pull-elasticsearch-image:
 	docker pull $(ELASTICSEARCH_IMAGE)
+setup:
+	#!/bin/bash \
+	apt-get update \
+	apt install sudo \
+	sudo apt-get --assume-yes install apt-transport-https ca-certificates curl gnupg lsb-release \
+	apt-get install -y apt-transport-https ca-certificates curl gpg \
+	curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.28/deb/Release.key | gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg \
+	echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.28/deb/ /' | tee /etc/apt/sources.list.d/kubernetes.list \
+	apt-get install -y kubelet kubeadm kubectl \
+	apt-mark hold kubelet kubeadm kubectl \
+	sudo apt-get install -y kubectl \
+	curl -LO "https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl" \
+	chmod +x ./kubectl \
+	sudo mv ./kubectl /usr/local/bin/kubectl \
+	kubectl version \
+	apt-get install sysvinit-utils \
+	sudo apt-get --assume-yes install docker-ce docker-ce-cli containerd.io \
+	whoami \
+	service docker start \
+	sleep 2s \
+	service docker status \
+	echo -----------------docker status---------------------
 
 secrets:
 	docker rm -f elastic-helm-charts-certs || true
